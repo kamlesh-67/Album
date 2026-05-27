@@ -52,6 +52,7 @@ const PALETTES: Palette[] = [
 
 export default function Home() {
   const [unlocked, setUnlocked] = React.useState(false);
+  const [showWelcomeDialog, setShowWelcomeDialog] = React.useState(false);
   const userName = 'Kamlesh';
   const loveName = 'Sunita';
   const [anniversary, setAnniversary] = React.useState('');
@@ -63,6 +64,12 @@ export default function Home() {
 
   // Live timer States
   const [daysOfLove, setDaysOfLove] = React.useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+
+  // Show welcome dialog on very first visit
+  React.useEffect(() => {
+    const seen = localStorage.getItem('love_welcome_seen');
+    if (!seen) setShowWelcomeDialog(true);
+  }, []);
 
   // Load configuration from local storage
   React.useEffect(() => {
@@ -130,7 +137,74 @@ export default function Home() {
 
   return (
     <main className={`min-h-screen relative flex flex-col items-center transition-colors duration-500 py-6 sm:py-12 px-4 select-none ${currentPalette.bgClass}`}>
-      
+
+      {/* Welcome dialog — best experience hint */}
+      <AnimatePresence>
+        {showWelcomeDialog && (
+          <motion.div
+            className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+          >
+            <motion.div
+              className="relative bg-white rounded-3xl shadow-2xl max-w-sm w-full px-8 py-10 flex flex-col items-center text-center overflow-hidden"
+              initial={{ scale: 0.85, opacity: 0, y: 24 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 280, damping: 24 }}
+            >
+              {/* soft pink glow blob */}
+              <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-rose-100 blur-3xl opacity-60 pointer-events-none" />
+              <div className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full bg-pink-100 blur-3xl opacity-60 pointer-events-none" />
+
+              {/* icons row */}
+              <div className="flex items-center gap-4 mb-5 relative z-10">
+                <div className="w-14 h-14 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center shadow-sm">
+                  <span className="text-2xl">💻</span>
+                </div>
+                <Heart className="h-5 w-5 text-rose-300 fill-rose-200 animate-pulse shrink-0" />
+                <div className="w-14 h-14 rounded-2xl bg-purple-50 border border-purple-100 flex items-center justify-center shadow-sm">
+                  <span className="text-2xl">🎧</span>
+                </div>
+              </div>
+
+              {/* heading */}
+              <h2 className="font-serif font-bold text-rose-900 text-xl leading-snug mb-2 relative z-10">
+                For the best experience
+              </h2>
+
+              {/* tips */}
+              <div className="flex flex-col gap-2.5 w-full mt-1 mb-6 relative z-10">
+                <div className="flex items-start gap-3 bg-rose-50 border border-rose-100 rounded-2xl px-4 py-3 text-left">
+                  <span className="text-lg shrink-0">💻</span>
+                  <p className="text-sm text-rose-800 leading-snug">
+                    <span className="font-semibold">Open on a laptop</span> — this album is designed for a wider screen so every memory looks its best.
+                  </p>
+                </div>
+                <div className="flex items-start gap-3 bg-purple-50 border border-purple-100 rounded-2xl px-4 py-3 text-left">
+                  <span className="text-lg shrink-0">🎧</span>
+                  <p className="text-sm text-purple-800 leading-snug">
+                    <span className="font-semibold">Wear headphones</span> — there is music and video audio that feels much more intimate when you listen closely.
+                  </p>
+                </div>
+              </div>
+
+              {/* CTA */}
+              <button
+                onClick={() => {
+                  localStorage.setItem('love_welcome_seen', 'true');
+                  setShowWelcomeDialog(false);
+                }}
+                className="relative z-10 w-full bg-gradient-to-r from-rose-400 to-pink-500 hover:from-rose-500 hover:to-pink-600 text-white font-semibold text-sm py-3 rounded-2xl shadow-md transition-all duration-200 cursor-pointer"
+              >
+                I&apos;m ready 💕
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Absolute particle / spark background layout */}
       <SparklesBackground />
 
