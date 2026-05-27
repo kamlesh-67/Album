@@ -242,6 +242,63 @@ function MediaPanel({ memory, align }: { memory: Memory; align: 'left' | 'right'
   );
 }
 
+/* Fullscreen letter backdrop for secret note */
+function SecretNoteModal({ memory, onClose }: { memory: Memory; onClose: () => void }) {
+  React.useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onClose]);
+
+  return (
+    <div
+      className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/60 backdrop-blur-md animate-in fade-in duration-200 cursor-pointer"
+      onClick={onClose}
+    >
+      <div
+        className="relative max-w-lg w-full cursor-default animate-in zoom-in-95 fade-in duration-300"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Paper texture card */}
+        <div className="relative bg-[#fffbf7] rounded-3xl shadow-2xl px-10 py-12 overflow-hidden"
+          style={{ backgroundImage: 'repeating-linear-gradient(transparent, transparent 31px, #fde8e8 31px, #fde8e8 32px)', backgroundSize: '100% 32px', backgroundPosition: '0 40px' }}
+        >
+          {/* top fold corner */}
+          <div className="absolute top-0 right-0 w-10 h-10 bg-rose-100 rounded-bl-2xl opacity-70" />
+
+          {/* decorative hearts */}
+          <Heart className="absolute top-5 left-6 h-5 w-5 text-rose-200 fill-rose-100 opacity-60" />
+          <Heart className="absolute bottom-5 right-8 h-4 w-4 text-pink-200 fill-pink-100 opacity-50" />
+
+          {/* header */}
+          <div className="flex items-center gap-2 mb-6">
+            <div className={`w-7 h-7 rounded-full bg-gradient-to-br ${memory.accentFrom} ${memory.accentTo} flex items-center justify-center shadow-sm shrink-0`}>
+              {memory.icon}
+            </div>
+            <div>
+              <p className="text-[9px] font-bold uppercase tracking-widest text-rose-400 font-mono">My secret thought</p>
+              <p className="text-xs font-serif text-rose-700 italic">{memory.title} — {memory.displayDate}</p>
+            </div>
+          </div>
+
+          {/* the note text */}
+          <p className="text-base font-serif italic text-rose-900 leading-loose relative z-10">
+            &ldquo;{memory.secretNote}&rdquo;
+          </p>
+
+          {/* close hint */}
+          <button
+            onClick={onClose}
+            className="mt-8 flex items-center gap-1.5 text-[10px] text-rose-400 hover:text-rose-600 transition-colors cursor-pointer font-mono uppercase tracking-widest"
+          >
+            <EyeOff className="h-3 w-3" /> close
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* Text panel — sits on opposite side with title + description + secret note */
 function TextPanel({ memory, align }: { memory: Memory; align: 'left' | 'right' }) {
   const [open, setOpen] = React.useState(false);
@@ -264,30 +321,17 @@ function TextPanel({ memory, align }: { memory: Memory; align: 'left' | 'right' 
       {/* Description */}
       <p className="text-sm text-gray-600 leading-relaxed font-sans">{memory.description}</p>
 
-      {/* Secret note */}
-      {!open ? (
-        <button
-          onClick={() => setOpen(true)}
-          className={`flex items-center gap-1.5 text-[11px] font-bold text-pink-500 hover:text-rose-600 bg-rose-50 hover:bg-rose-100 px-3 py-2 rounded-xl border border-pink-100 transition-colors cursor-pointer ${isRight ? 'self-end' : 'self-start'}`}
-        >
-          <MessageSquare className="h-3.5 w-3.5" />
-          My secret thought...
-          <Eye className="h-3.5 w-3.5 animate-pulse" />
-        </button>
-      ) : (
-        <div className={`bg-gradient-to-br from-rose-50 to-pink-50 border border-pink-100 rounded-2xl p-4 relative w-full animate-in fade-in slide-in-from-bottom-2 duration-300`}>
-          <Heart className={`absolute top-3 ${isRight ? 'left-3' : 'right-3'} h-4 w-4 text-pink-200 fill-pink-100`} />
-          <p className="text-sm font-sans text-rose-800 leading-relaxed tracking-wide">
-            &ldquo;{memory.secretNote}&rdquo;
-          </p>
-          <button
-            onClick={() => setOpen(false)}
-            className={`mt-2 flex items-center gap-1 text-[10px] text-gray-400 hover:text-gray-600 cursor-pointer ${isRight ? 'ml-auto' : ''}`}
-          >
-            <EyeOff className="h-3 w-3" /> hide
-          </button>
-        </div>
-      )}
+      {/* Secret note trigger */}
+      <button
+        onClick={() => setOpen(true)}
+        className={`flex items-center gap-1.5 text-[11px] font-bold text-pink-500 hover:text-rose-600 bg-rose-50 hover:bg-rose-100 px-3 py-2 rounded-xl border border-pink-100 transition-colors cursor-pointer ${isRight ? 'self-end' : 'self-start'}`}
+      >
+        <MessageSquare className="h-3.5 w-3.5" />
+        My secret thought...
+        <Eye className="h-3.5 w-3.5 animate-pulse" />
+      </button>
+
+      {open && <SecretNoteModal memory={memory} onClose={() => setOpen(false)} />}
     </div>
   );
 }
