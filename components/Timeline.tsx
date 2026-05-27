@@ -28,9 +28,9 @@ const MEMORIES: Memory[] = [
     title: 'The Day We Found Love',
     subtitle: 'The beginning of everything',
     description:
-      'The most sacred day of my life — the day we looked at each other and knew. No words, no explanation. Just a quiet, certain knowing that everything had changed forever. You became my world the moment I realised I loved you.',
+      'The day we said "I love you" to each other was not a beautiful day in the ordinary sense. We were not lovers, and not just ordinary friends either — we had already assumed each other as husband and wife. That is what made it so different. That is what made it ours.',
     secretNote:
-      'I had been feeling it for days, but that day something settled in my chest — warm and unmoving. That was love. That was you.',
+      'I never truly felt love at that moment — you were the one who loved me. But as time passed and we spent days together, as I started knowing you more and more, something shifted quietly inside me. That is when I fell in love with you.',
     mediaUrl: '/assets/images/hand.jpg',
     mediaType: 'image',
     icon: <Heart className="h-5 w-5 fill-white text-white" />,

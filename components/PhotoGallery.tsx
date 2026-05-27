@@ -20,7 +20,7 @@ const GALLERY: MediaItem[] = [
     id: 'dq1',
     src: '/assets/images/dance.mp4',
     type: 'video',
-    caption: 'Our dance moment together 💃',
+    caption: 'Her dance — full of energy, passion, and moves that are truly killing 💃🔥',
     album: 'Dancing Queen',
     albumEmoji: '💃',
   },
