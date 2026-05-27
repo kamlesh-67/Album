@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { Heart, X, ChevronLeft, ChevronRight, Play } from 'lucide-react';
+import { useTheme } from '@/lib/ThemeContext';
 
 type MediaType = 'image' | 'video';
 
@@ -307,6 +308,7 @@ function LightboxMedia({ item }: { item: MediaItem }) {
 }
 
 export default function PhotoGallery() {
+  const { palette: p } = useTheme();
   const [activeAlbum, setActiveAlbum] = React.useState<string>('All');
   const [lightboxIndex, setLightboxIndex] = React.useState<number | null>(null);
 
@@ -342,30 +344,26 @@ export default function PhotoGallery() {
     <div className="w-full flex flex-col gap-6" id="photo-gallery-section">
 
       {/* Album filter strip */}
-      <div className="flex flex-wrap gap-2 bg-white/50 p-4 rounded-2xl border border-pink-100/65 glass-morphism shadow-sm">
-        <button
-          onClick={() => setActiveAlbum('All')}
-          className={`px-3 py-1.5 text-xs rounded-full font-semibold transition-all cursor-pointer ${
-            activeAlbum === 'All'
-              ? 'bg-rose-500 text-white shadow-md'
-              : 'bg-white hover:bg-rose-50 text-rose-800 border border-pink-100'
-          }`}
-        >
-          All Memories
-        </button>
-        {ALBUMS.map((album) => {
+      <div className="flex flex-wrap gap-2 bg-white/50 p-4 rounded-2xl shadow-sm" style={{ border: `1px solid ${p.accentLight}` }}>
+        {(['All', ...ALBUMS] as string[]).map((album) => {
+          const isActive = activeAlbum === album;
           const item = GALLERY.find((m) => m.album === album);
           return (
             <button
               key={album}
               onClick={() => setActiveAlbum(album)}
-              className={`px-3 py-1.5 text-xs rounded-full font-semibold transition-all cursor-pointer ${
-                activeAlbum === album
-                  ? 'bg-rose-500 text-white shadow-md'
-                  : 'bg-white hover:bg-rose-50 text-rose-800 border border-pink-100'
-              }`}
+              className="px-3 py-1.5 text-xs rounded-full font-semibold transition-all cursor-pointer"
+              style={isActive ? {
+                background: `linear-gradient(to right, ${p.gradFrom}, ${p.gradTo})`,
+                color: '#fff',
+                boxShadow: `0 2px 8px ${p.gradFrom}55`,
+              } : {
+                background: '#fff',
+                color: p.textSecondary,
+                border: `1px solid ${p.accentLight}`,
+              }}
             >
-              {item?.albumEmoji} {album}
+              {album === 'All' ? 'All Memories' : `${item?.albumEmoji} ${album}`}
             </button>
           );
         })}
@@ -442,20 +440,20 @@ export default function PhotoGallery() {
             </div>
 
             {/* Info panel */}
-            <div className="w-full md:w-1/3 p-6 flex flex-col justify-between bg-[#fffcfb]">
+            <div className="w-full md:w-1/3 p-6 flex flex-col justify-between" style={{ background: p.surface }}>
               <div className="space-y-3">
-                <span className="text-[10px] text-pink-500 font-mono tracking-widest block uppercase border-b border-pink-50 pb-2">
+                <span className="text-[10px] font-mono tracking-widest block uppercase pb-2" style={{ color: p.accentStrong, borderBottom: `1px solid ${p.accentLight}` }}>
                   {filtered[lightboxIndex].albumEmoji} {filtered[lightboxIndex].album}
                 </span>
-                <p className="font-cursive text-rose-950 text-xl font-bold italic leading-relaxed">
+                <p className="font-cursive text-xl font-bold italic leading-relaxed" style={{ color: p.textPrimary }}>
                   {filtered[lightboxIndex].caption}
                 </p>
-                <div className="flex items-center gap-1.5 text-rose-400">
-                  <Heart className="h-4 w-4 fill-rose-300" />
-                  <span className="text-xs font-semibold text-rose-700">Kamlesh ❤️ Sunita</span>
+                <div className="flex items-center gap-1.5">
+                  <Heart className="h-4 w-4" style={{ fill: p.accentMid, color: p.accentStrong }} />
+                  <span className="text-xs font-semibold" style={{ color: p.textSecondary }}>Kamlesh ❤️ Sunita</span>
                 </div>
               </div>
-              <div className="pt-4 border-t border-pink-50">
+              <div className="pt-4" style={{ borderTop: `1px solid ${p.accentLight}` }}>
                 <p className="text-[10px] text-gray-400 font-mono">
                   {lightboxIndex + 1} / {filtered.length}
                 </p>

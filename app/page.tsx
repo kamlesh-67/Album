@@ -8,104 +8,10 @@ import MusicPlayer from '@/components/MusicPlayer';
 import Timeline from '@/components/Timeline';
 import PhotoGallery from '@/components/PhotoGallery';
 import SecretNotes from '@/components/SecretNotes';
-
-// Pastel theme sets
-interface Palette {
-  id: string;
-  name: string;
-  bgClass: string;
-  accentClass: string;
-  badgeClass: string;
-  cardBorder: string;
-  highlightText: string;
-}
-
-const PALETTES: Palette[] = [
-  {
-    id: 'blushing',
-    name: 'Blushing Rosé',
-    bgClass: 'bg-[#fffbfb]',
-    accentClass: 'from-rose-400 to-pink-500 hover:from-rose-500 hover:to-pink-600',
-    badgeClass: 'text-rose-600 bg-rose-50 border-rose-100',
-    cardBorder: 'border-pink-100',
-    highlightText: 'text-rose-900',
-  },
-  {
-    id: 'honey',
-    name: 'Apricot Honey',
-    bgClass: 'bg-[#fffdf8]',
-    accentClass: 'from-amber-400 to-orange-500 hover:from-amber-500 hover:to-orange-600',
-    badgeClass: 'text-amber-800 bg-amber-50 border-amber-100',
-    cardBorder: 'border-amber-100',
-    highlightText: 'text-amber-900',
-  },
-  {
-    id: 'lavender',
-    name: 'Wisteria Dusk',
-    bgClass: 'bg-[#faf8ff]',
-    accentClass: 'from-purple-400 to-indigo-500 hover:from-purple-500 hover:to-indigo-600',
-    badgeClass: 'text-purple-600 bg-purple-50 border-purple-100',
-    cardBorder: 'border-purple-100',
-    highlightText: 'text-purple-900',
-  }
-];
-
-function isMobileDevice(): boolean {
-  if (typeof window === 'undefined') return false;
-  const ua = navigator.userAgent;
-  // Touch-primary devices: phones and tablets
-  const mobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|Tablet/i.test(ua);
-  // Also catch small screens (phones/tablets up to 1024px)
-  const smallScreen = window.innerWidth < 1024;
-  return mobileUA || smallScreen;
-}
-
-function MobileBlock() {
-  return (
-    <div className="min-h-screen bg-[#fffbfb] flex flex-col items-center justify-center px-8 text-center">
-      <div className="flex flex-col items-center gap-6 max-w-xs">
-        {/* icon */}
-        <div className="w-20 h-20 rounded-3xl bg-rose-50 border border-rose-100 flex items-center justify-center shadow-sm">
-          <span className="text-4xl">💻</span>
-        </div>
-
-        {/* heading */}
-        <div>
-          <h1 className="font-serif font-bold text-rose-900 text-2xl mb-2 leading-snug">
-            Open on a Laptop
-          </h1>
-          <p className="text-sm text-gray-500 leading-relaxed font-sans">
-            This memory album was crafted for a larger screen. Please open it on your laptop or desktop for the full experience.
-          </p>
-        </div>
-
-        {/* divider with heart */}
-        <div className="flex items-center gap-3 w-full">
-          <div className="h-px flex-1 bg-rose-100" />
-          <Heart className="h-4 w-4 text-rose-300 fill-rose-200 animate-pulse" />
-          <div className="h-px flex-1 bg-rose-100" />
-        </div>
-
-        {/* headphones hint */}
-        <div className="flex items-start gap-3 bg-purple-50 border border-purple-100 rounded-2xl px-4 py-3 text-left w-full">
-          <span className="text-lg shrink-0">🎧</span>
-          <p className="text-sm text-purple-800 leading-snug font-sans">
-            Wear headphones too — the music and videos are much more intimate that way.
-          </p>
-        </div>
-
-        <p className="text-[10px] font-mono text-rose-300 tracking-widest uppercase">
-          Made with love — Kamlesh &amp; Sunita
-        </p>
-      </div>
-    </div>
-  );
-}
+import { ThemeContext, PALETTES } from '@/lib/ThemeContext';
 
 export default function Home() {
-  const [isMobile, setIsMobile] = React.useState(false);
   const [unlocked, setUnlocked] = React.useState(false);
-  const [showWelcomeDialog, setShowWelcomeDialog] = React.useState(false);
   const userName = 'Kamlesh';
   const loveName = 'Sunita';
   const [anniversary, setAnniversary] = React.useState('');
@@ -113,24 +19,10 @@ export default function Home() {
   const [activePaletteIndex, setActivePaletteIndex] = React.useState(0);
   const [activeTab, setActiveTab] = React.useState<'timeline' | 'gallery' | 'notes' | 'music'>('timeline');
 
-  const CORRECT_DATE = '2024-12-25';
+  const CORRECT_DATE = '2024-11-08';
 
   // Live timer States
   const [daysOfLove, setDaysOfLove] = React.useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
-
-  // Detect mobile / small screen — re-check on resize
-  React.useEffect(() => {
-    const check = () => setIsMobile(isMobileDevice());
-    check();
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
-  }, []);
-
-  // Show welcome dialog on very first visit
-  React.useEffect(() => {
-    const seen = localStorage.getItem('love_welcome_seen');
-    if (!seen) setShowWelcomeDialog(true);
-  }, []);
 
   // Load configuration from local storage
   React.useEffect(() => {
@@ -177,7 +69,7 @@ export default function Home() {
 
   const handleUnlockAndSave = () => {
     if (anniversary !== CORRECT_DATE) {
-      setDateError('Hmm, that date doesn\'t feel right. Remember the first time we made love? 💕');
+      setDateError('Hmm, that date doesn\'t feel right. Remember the day we realised our love? 💕');
       return;
     }
     setDateError('');
@@ -195,79 +87,15 @@ export default function Home() {
   };
 
   const currentPalette = PALETTES[activePaletteIndex];
-
-  if (isMobile) return <MobileBlock />;
+  const p = currentPalette;
 
   return (
-    <main className={`min-h-screen relative flex flex-col items-center transition-colors duration-500 py-6 sm:py-12 px-4 select-none ${currentPalette.bgClass}`}>
-
-      {/* Welcome dialog — best experience hint */}
-      <AnimatePresence>
-        {showWelcomeDialog && (
-          <motion.div
-            className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            <motion.div
-              className="relative bg-white rounded-3xl shadow-2xl max-w-sm w-full px-8 py-10 flex flex-col items-center text-center overflow-hidden"
-              initial={{ scale: 0.85, opacity: 0, y: 24 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              transition={{ type: 'spring', stiffness: 280, damping: 24 }}
-            >
-              {/* soft pink glow blob */}
-              <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-rose-100 blur-3xl opacity-60 pointer-events-none" />
-              <div className="absolute -bottom-10 -left-10 w-40 h-40 rounded-full bg-pink-100 blur-3xl opacity-60 pointer-events-none" />
-
-              {/* icons row */}
-              <div className="flex items-center gap-4 mb-5 relative z-10">
-                <div className="w-14 h-14 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center shadow-sm">
-                  <span className="text-2xl">💻</span>
-                </div>
-                <Heart className="h-5 w-5 text-rose-300 fill-rose-200 animate-pulse shrink-0" />
-                <div className="w-14 h-14 rounded-2xl bg-purple-50 border border-purple-100 flex items-center justify-center shadow-sm">
-                  <span className="text-2xl">🎧</span>
-                </div>
-              </div>
-
-              {/* heading */}
-              <h2 className="font-serif font-bold text-rose-900 text-xl leading-snug mb-2 relative z-10">
-                For the best experience
-              </h2>
-
-              {/* tips */}
-              <div className="flex flex-col gap-2.5 w-full mt-1 mb-6 relative z-10">
-                <div className="flex items-start gap-3 bg-rose-50 border border-rose-100 rounded-2xl px-4 py-3 text-left">
-                  <span className="text-lg shrink-0">💻</span>
-                  <p className="text-sm text-rose-800 leading-snug">
-                    <span className="font-semibold">Open on a laptop</span> — this album is designed for a wider screen so every memory looks its best.
-                  </p>
-                </div>
-                <div className="flex items-start gap-3 bg-purple-50 border border-purple-100 rounded-2xl px-4 py-3 text-left">
-                  <span className="text-lg shrink-0">🎧</span>
-                  <p className="text-sm text-purple-800 leading-snug">
-                    <span className="font-semibold">Wear headphones</span> — there is music and video audio that feels much more intimate when you listen closely.
-                  </p>
-                </div>
-              </div>
-
-              {/* CTA */}
-              <button
-                onClick={() => {
-                  localStorage.setItem('love_welcome_seen', 'true');
-                  setShowWelcomeDialog(false);
-                }}
-                className="relative z-10 w-full bg-gradient-to-r from-rose-400 to-pink-500 hover:from-rose-500 hover:to-pink-600 text-white font-semibold text-sm py-3 rounded-2xl shadow-md transition-all duration-200 cursor-pointer"
-              >
-                I&apos;m ready 💕
-              </button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
+    <ThemeContext.Provider value={{ palette: p, paletteIndex: activePaletteIndex, setPaletteIndex: setActivePaletteIndex }}>
+    <main
+      className="min-h-screen relative flex flex-col items-center transition-colors duration-500 py-6 sm:py-12 px-4 select-none"
+      style={{ background: p.bg }}
+    >
+      
       {/* Absolute particle / spark background layout */}
       <SparklesBackground />
 
@@ -312,7 +140,7 @@ export default function Home() {
             {/* Input config ledger */}
             <div className="space-y-4 text-left mb-8">
               <div>
-                <label className="block text-[10px] font-bold text-rose-900 uppercase tracking-widest mb-1.5 font-sans">The date we first made love</label>
+                <label className="block text-[10px] font-bold text-rose-900 uppercase tracking-widest mb-1.5 font-sans">Date we realise our love</label>
                 <input
                   type="date"
                   value={anniversary}
@@ -334,11 +162,17 @@ export default function Home() {
                       key={pal.id}
                       type="button"
                       onClick={() => setActivePaletteIndex(i)}
-                      className={`text-[10px] font-bold py-2 rounded-xl border transition-all ${
-                        activePaletteIndex === i
-                          ? 'border-rose-400 bg-rose-50 text-rose-700 shadow-inner ring-1 ring-rose-300'
-                          : 'border-pink-50 hover:bg-rose-50/40 text-rose-950 bg-white/50'
-                      }`}
+                      className="text-[10px] font-bold py-2 rounded-xl border transition-all"
+                      style={activePaletteIndex === i ? {
+                        background: pal.badgeBg,
+                        borderColor: pal.accentStrong,
+                        color: pal.textSecondary,
+                        boxShadow: `0 0 0 1px ${pal.accentMid}`,
+                      } : {
+                        background: 'rgba(255,255,255,0.5)',
+                        borderColor: pal.accentLight,
+                        color: pal.textPrimary,
+                      }}
                     >
                       {pal.name}
                     </button>
@@ -350,7 +184,8 @@ export default function Home() {
             {/* Turn Key submit button */}
             <button
               onClick={handleUnlockAndSave}
-              className={`w-full flex items-center justify-center gap-1.5 py-4 rounded-2xl bg-gradient-to-r text-white font-serif font-bold text-sm shadow-xl transition-all active:scale-95 duration-300 cursor-pointer ${currentPalette.accentClass}`}
+              className="w-full flex items-center justify-center gap-1.5 py-4 rounded-2xl text-white font-serif font-bold text-sm shadow-xl transition-all active:scale-95 duration-300 cursor-pointer"
+              style={{ background: `linear-gradient(to right, ${p.gradFrom}, ${p.gradTo})` }}
               id="unlock-vault-btn"
             >
               <Stars className="h-4 w-4 animate-spin text-white" />
@@ -409,7 +244,10 @@ export default function Home() {
             </div>
 
             {/* Relationship Progress widget (Days of Love live ticker) */}
-            <div className="bg-gradient-to-r from-rose-400 via-pink-400 to-rose-400 p-6 rounded-3xl text-white shadow-lg relative overflow-hidden text-center sm:text-left select-none animate-gradient">
+            <div
+              className="p-6 rounded-3xl text-white shadow-lg relative overflow-hidden text-center sm:text-left select-none"
+              style={{ background: `linear-gradient(to right, ${p.gradFrom}, ${p.gradTo}, ${p.gradFrom})` }}
+            >
               <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
                 <div>
                   <span className="text-[10px] uppercase font-bold tracking-widest text-pink-100/90 block mb-1">
@@ -448,47 +286,31 @@ export default function Home() {
             </div>
 
             {/* Navigation Tabs Scrapbook Lace Booklet selectors */}
-            <div className="flex items-center justify-center bg-white/60 p-2 rounded-2xl border border-pink-100/60 shadow-sm glass-morphism justify-between sm:justify-center gap-1.5 sm:gap-4 overflow-x-auto" id="scrapbook-tabs">
-              <button
-                onClick={() => setActiveTab('timeline')}
-                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-serif font-black transition-all cursor-pointer truncate ${
-                  activeTab === 'timeline'
-                    ? 'bg-rose-500 text-white shadow-md shadow-rose-200'
-                    : 'text-rose-950 hover:bg-rose-50'
-                }`}
-              >
-                📖 Timeline
-              </button>
-              <button
-                onClick={() => setActiveTab('gallery')}
-                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-serif font-black transition-all cursor-pointer truncate ${
-                  activeTab === 'gallery'
-                    ? 'bg-rose-500 text-white shadow-md shadow-rose-200'
-                    : 'text-rose-950 hover:bg-rose-50'
-                }`}
-              >
-                📸 Polaroid Deck
-              </button>
-              <button
-                onClick={() => setActiveTab('notes')}
-                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-serif font-black transition-all cursor-pointer truncate ${
-                  activeTab === 'notes'
-                    ? 'bg-rose-500 text-white shadow-md shadow-rose-200'
-                    : 'text-rose-950 hover:bg-rose-50'
-                }`}
-              >
-                🔒 Secret Chest
-              </button>
-              <button
-                onClick={() => setActiveTab('music')}
-                className={`flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-serif font-black transition-all cursor-pointer truncate ${
-                  activeTab === 'music'
-                    ? 'bg-rose-500 text-white shadow-md shadow-rose-200'
-                    : 'text-rose-950 hover:bg-rose-50'
-                }`}
-              >
-                🎵 Love Harmony
-              </button>
+            <div
+              className="flex items-center justify-between sm:justify-center gap-1.5 sm:gap-4 overflow-x-auto p-2 rounded-2xl shadow-sm"
+              style={{ background: 'rgba(255,255,255,0.65)', border: `1px solid ${p.accentLight}` }}
+              id="scrapbook-tabs"
+            >
+              {(['timeline', 'gallery', 'notes', 'music'] as const).map((tab) => {
+                const labels: Record<string, string> = { timeline: '📖 Timeline', gallery: '📸 Polaroid Deck', notes: '🔒 Secret Chest', music: '🎵 Love Harmony' };
+                const isActive = activeTab === tab;
+                return (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveTab(tab)}
+                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-serif font-black transition-all cursor-pointer truncate"
+                    style={isActive ? {
+                      background: `linear-gradient(to right, ${p.gradFrom}, ${p.gradTo})`,
+                      color: '#fff',
+                      boxShadow: `0 2px 12px ${p.gradFrom}55`,
+                    } : {
+                      color: p.textPrimary,
+                    }}
+                  >
+                    {labels[tab]}
+                  </button>
+                );
+              })}
             </div>
 
             {/* Active Content Frame Tab Panel */}
@@ -542,7 +364,7 @@ export default function Home() {
             </div>
 
             {/* Whimsical Love Message board note */}
-            <div className={`mt-8 text-center border-t ${currentPalette.cardBorder} pt-6 pb-2 select-none`}>
+            <div className="mt-8 text-center pt-6 pb-2 select-none" style={{ borderTop: `1px solid ${p.accentLight}` }}>
               <div className="inline-flex items-center justify-center gap-1 text-[11px] font-cursive leading-none italic font-bold tracking-wide text-rose-500 mb-1.5 md:text-sm">
                 <Heart className="h-3 w-3 fill-rose-500 animate-beat text-rose-500 animate-pulse" /> We are writers of our own legend.
               </div>
@@ -554,5 +376,6 @@ export default function Home() {
         )}
       </AnimatePresence>
     </main>
+    </ThemeContext.Provider>
   );
 }

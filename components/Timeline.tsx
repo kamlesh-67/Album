@@ -2,6 +2,22 @@
 
 import * as React from 'react';
 import { Heart, MessageSquare, Eye, Sparkles, Star, Flame, Bike, X, Play, Expand } from 'lucide-react';
+import { useTheme } from '@/lib/ThemeContext';
+
+function SecretNoteButton({ isRight, onClick }: { isRight: boolean; onClick: () => void }) {
+  const { palette: p } = useTheme();
+  return (
+    <button
+      onClick={onClick}
+      className={`flex items-center gap-1.5 text-[11px] font-bold px-3 py-2 rounded-xl border transition-colors cursor-pointer ${isRight ? 'self-end' : 'self-start'}`}
+      style={{ background: p.badgeBg, borderColor: p.badgeBorder, color: p.textSecondary }}
+    >
+      <MessageSquare className="h-3.5 w-3.5" />
+      My secret thought...
+      <Eye className="h-3.5 w-3.5 animate-pulse" />
+    </button>
+  );
+}
 
 interface Memory {
   id: string;
@@ -95,26 +111,6 @@ const MEMORIES: Memory[] = [
   },
 ];
 
-function MediaBlock({ url, type, title }: { url: string; type: 'image' | 'video'; title: string }) {
-  if (type === 'video') {
-    return (
-      <video
-        src={url}
-        controls
-        muted
-        playsInline
-        className="w-full rounded-2xl object-cover max-h-64 border-4 border-white shadow-lg"
-      />
-    );
-  }
-  return (
-    <img
-      src={url}
-      alt={title}
-      className="w-full rounded-2xl object-cover max-h-64 border-4 border-white shadow-lg"
-    />
-  );
-}
 
 /* Fullscreen lightbox — image or video, video autoplays, no controls */
 function Lightbox({ memory, onClose }: { memory: Memory; onClose: () => void }) {
@@ -359,14 +355,7 @@ function TextPanel({ memory, align }: { memory: Memory; align: 'left' | 'right' 
       <p className="text-sm text-gray-600 leading-relaxed font-sans">{memory.description}</p>
 
       {/* Secret note button */}
-      <button
-        onClick={() => setOpen(true)}
-        className={`flex items-center gap-1.5 text-[11px] font-bold text-pink-500 hover:text-rose-600 bg-rose-50 hover:bg-rose-100 px-3 py-2 rounded-xl border border-pink-100 transition-colors cursor-pointer ${isRight ? 'self-end' : 'self-start'}`}
-      >
-        <MessageSquare className="h-3.5 w-3.5" />
-        My secret thought...
-        <Eye className="h-3.5 w-3.5 animate-pulse" />
-      </button>
+      <SecretNoteButton isRight={isRight} onClick={() => setOpen(true)} />
 
       {open && <SecretLetterModal memory={memory} onClose={() => setOpen(false)} />}
     </div>
@@ -374,25 +363,26 @@ function TextPanel({ memory, align }: { memory: Memory; align: 'left' | 'right' 
 }
 
 export default function Timeline() {
+  const { palette: p } = useTheme();
   return (
     <div className="w-full flex flex-col gap-0" id="timeline-section">
 
       {/* Header */}
       <div className="flex items-center gap-3 mb-10 select-none">
-        <div className="h-px flex-1 bg-gradient-to-r from-transparent to-pink-200" />
-        <div className="flex items-center gap-2 bg-white border border-pink-100 rounded-full px-4 py-2 shadow-sm">
-          <Sparkles className="h-3.5 w-3.5 text-rose-400 animate-spin" />
-          <span className="text-[11px] font-bold text-rose-700 uppercase tracking-widest font-mono">Our Story So Far</span>
-          <Heart className="h-3.5 w-3.5 text-rose-400 fill-rose-300 animate-pulse" />
+        <div className="h-px flex-1" style={{ background: `linear-gradient(to right, transparent, ${p.accentMid})` }} />
+        <div className="flex items-center gap-2 bg-white rounded-full px-4 py-2 shadow-sm" style={{ border: `1px solid ${p.accentLight}` }}>
+          <Sparkles className="h-3.5 w-3.5 animate-spin" style={{ color: p.accentStrong }} />
+          <span className="text-[11px] font-bold uppercase tracking-widest font-mono" style={{ color: p.textSecondary }}>Our Story So Far</span>
+          <Heart className="h-3.5 w-3.5 animate-pulse" style={{ color: p.accentStrong, fill: p.accentMid }} />
         </div>
-        <div className="h-px flex-1 bg-gradient-to-l from-transparent to-pink-200" />
+        <div className="h-px flex-1" style={{ background: `linear-gradient(to left, transparent, ${p.accentMid})` }} />
       </div>
 
       {/* Timeline — center rope, alternating cards */}
       <div className="relative">
 
         {/* Center vertical rope */}
-        <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-rose-200 via-pink-300 to-purple-200 pointer-events-none" />
+        <div className="absolute left-1/2 -translate-x-1/2 top-0 bottom-0 w-0.5 pointer-events-none" style={{ background: `linear-gradient(to bottom, ${p.accentLight}, ${p.accentMid}, ${p.accentStrong})` }} />
 
         <div className="space-y-16">
           {MEMORIES.map((memory, idx) => {
@@ -435,14 +425,14 @@ export default function Timeline() {
       {/* Footer — end of timeline so far */}
       <div className="mt-14 flex flex-col items-center gap-3 select-none">
         <div className="flex items-center gap-2">
-          <div className="h-px w-16 bg-pink-200" />
-          <Heart className="h-5 w-5 fill-rose-300 text-rose-400 animate-pulse" />
-          <div className="h-px w-16 bg-pink-200" />
+          <div className="h-px w-16" style={{ background: p.accentMid }} />
+          <Heart className="h-5 w-5 animate-pulse" style={{ fill: p.accentMid, color: p.accentStrong }} />
+          <div className="h-px w-16" style={{ background: p.accentMid }} />
         </div>
-        <p className="text-[11px] font-mono text-rose-400 tracking-widest uppercase">
+        <p className="text-[11px] font-mono tracking-widest uppercase" style={{ color: p.accentStrong }}>
           To be continued... always
         </p>
-        <p className="text-xs font-serif italic text-rose-300">Kamlesh &amp; Sunita — writing our forever</p>
+        <p className="text-xs font-serif italic" style={{ color: p.textMuted }}>Kamlesh &amp; Sunita — writing our forever</p>
       </div>
 
     </div>

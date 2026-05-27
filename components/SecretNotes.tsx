@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { Lock, Unlock, Mail, Calendar, Sparkles, Heart, Compass } from 'lucide-react';
+import { useTheme } from '@/lib/ThemeContext';
 
 interface SecretLetter {
   id: string;
@@ -62,6 +63,7 @@ Happy Valentine’s Day, my sweet love.`
 ];
 
 export default function SecretNotes() {
+  const { palette: p } = useTheme();
   // Current local time from metadata is May 27, 2026
   const DEFAULT_CURRENT_DATE = '2026-05-27';
   const [simulatedDate, setSimulatedDate] = React.useState(DEFAULT_CURRENT_DATE);
@@ -93,7 +95,7 @@ export default function SecretNotes() {
     <div className="w-full flex flex-col gap-6" id="secret-capsule-section">
       
       {/* Time Travel Simulator Control Box */}
-      <div className="bg-gradient-to-r from-pink-50 to-rose-100/75 border border-pink-200 p-5 rounded-3xl shadow-sm relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="p-5 rounded-3xl shadow-sm relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-4" style={{ background: p.surface, border: `1px solid ${p.surfaceBorder}` }}>
         
         <div className="space-y-1 z-10">
           <div className="flex items-center gap-1.5 text-rose-800">
@@ -198,7 +200,8 @@ export default function SecretNotes() {
                 {unlocked ? (
                   <button
                     onClick={() => setOpenLetterId(letter.id)}
-                    className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-gradient-to-r from-rose-400 to-pink-500 hover:from-rose-500 hover:to-pink-600 text-white font-serif font-bold text-xs shadow-md transition-all active:scale-95 cursor-pointer"
+                    className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-white font-serif font-bold text-xs shadow-md transition-all active:scale-95 cursor-pointer"
+                    style={{ background: `linear-gradient(to right, ${p.gradFrom}, ${p.gradTo})` }}
                     id={`open-letter-btn-${letter.id}`}
                   >
                     <Mail className="h-3.5 w-3.5 fill-current" /> Read Secret Note
@@ -243,7 +246,7 @@ export default function SecretNotes() {
             >
               
               {/* Top flower details decoration */}
-              <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-pink-300 via-rose-400 to-pink-300" />
+              <div className="absolute top-0 left-0 right-0 h-2" style={{ background: `linear-gradient(to right, ${p.gradFrom}, ${p.gradTo}, ${p.gradFrom})` }} />
               <div className="absolute -top-12 -right-12 h-32 w-32 rounded-full bg-pink-100/50 opacity-50 border border-pink-200" />
               
               <div className="flex justify-between items-start border-b border-pink-100 pb-3 mb-5">
