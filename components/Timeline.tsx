@@ -277,7 +277,7 @@ function TextPanel({ memory, align }: { memory: Memory; align: 'left' | 'right' 
       ) : (
         <div className={`bg-gradient-to-br from-rose-50 to-pink-50 border border-pink-100 rounded-2xl p-4 relative w-full animate-in fade-in slide-in-from-bottom-2 duration-300`}>
           <Heart className={`absolute top-3 ${isRight ? 'left-3' : 'right-3'} h-4 w-4 text-pink-200 fill-pink-100`} />
-          <p className="text-sm italic font-serif text-rose-800 leading-relaxed">
+          <p className="text-sm font-sans text-rose-800 leading-relaxed tracking-wide">
             &ldquo;{memory.secretNote}&rdquo;
           </p>
           <button
