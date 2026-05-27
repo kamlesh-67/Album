@@ -1,7 +1,7 @@
 ﻿'use client';
 
 import * as React from 'react';
-import { Heart, MessageSquare, Eye, EyeOff, Sparkles, Star, Flame, Bike, X, Play, Expand } from 'lucide-react';
+import { Heart, MessageSquare, Eye, Sparkles, Star, Flame, Bike, X, Play, Expand } from 'lucide-react';
 
 interface Memory {
   id: string;
@@ -242,8 +242,8 @@ function MediaPanel({ memory, align }: { memory: Memory; align: 'left' | 'right'
   );
 }
 
-/* Fullscreen letter backdrop for secret note */
-function SecretNoteModal({ memory, onClose }: { memory: Memory; onClose: () => void }) {
+/* Fullscreen letter modal for secret note */
+function SecretLetterModal({ memory, onClose }: { memory: Memory; onClose: () => void }) {
   React.useEffect(() => {
     const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose(); };
     window.addEventListener('keydown', onKey);
@@ -252,48 +252,85 @@ function SecretNoteModal({ memory, onClose }: { memory: Memory; onClose: () => v
 
   return (
     <div
-      className="fixed inset-0 z-[200] flex items-center justify-center p-6 bg-black/60 backdrop-blur-md animate-in fade-in duration-200 cursor-pointer"
+      className="fixed inset-0 z-[300] flex items-center justify-center p-4 animate-in fade-in duration-300"
+      style={{ background: 'rgba(30,10,20,0.82)', backdropFilter: 'blur(6px)' }}
       onClick={onClose}
     >
+      {/* Letter paper */}
       <div
-        className="relative max-w-lg w-full cursor-default animate-in zoom-in-95 fade-in duration-300"
-        onClick={(e) => e.stopPropagation()}
+        className="relative max-w-lg w-full animate-in zoom-in-95 fade-in duration-300"
+        style={{
+          background: 'linear-gradient(160deg, #fffaf6 0%, #fff5f7 60%, #fdf0f4 100%)',
+          borderRadius: '4px',
+          boxShadow: '0 8px 60px rgba(180,60,80,0.18), 0 2px 8px rgba(0,0,0,0.10)',
+          border: '1px solid rgba(255,200,210,0.5)',
+        }}
+        onClick={e => e.stopPropagation()}
       >
-        {/* Paper texture card */}
-        <div className="relative bg-[#fffbf7] rounded-3xl shadow-2xl px-10 py-12 overflow-hidden"
-          style={{ backgroundImage: 'repeating-linear-gradient(transparent, transparent 31px, #fde8e8 31px, #fde8e8 32px)', backgroundSize: '100% 32px', backgroundPosition: '0 40px' }}
-        >
-          {/* top fold corner */}
-          <div className="absolute top-0 right-0 w-10 h-10 bg-rose-100 rounded-bl-2xl opacity-70" />
+        {/* Top fold crease line */}
+        <div style={{ height: '3px', background: 'linear-gradient(90deg, transparent, rgba(220,100,120,0.15), transparent)', borderRadius: '4px 4px 0 0' }} />
 
-          {/* decorative hearts */}
-          <Heart className="absolute top-5 left-6 h-5 w-5 text-rose-200 fill-rose-100 opacity-60" />
-          <Heart className="absolute bottom-5 right-8 h-4 w-4 text-pink-200 fill-pink-100 opacity-50" />
-
-          {/* header */}
-          <div className="flex items-center gap-2 mb-6">
-            <div className={`w-7 h-7 rounded-full bg-gradient-to-br ${memory.accentFrom} ${memory.accentTo} flex items-center justify-center shadow-sm shrink-0`}>
-              {memory.icon}
-            </div>
-            <div>
-              <p className="text-[9px] font-bold uppercase tracking-widest text-rose-400 font-mono">My secret thought</p>
-              <p className="text-xs font-serif text-rose-700 italic">{memory.title} — {memory.displayDate}</p>
-            </div>
+        <div className="px-10 py-10 flex flex-col gap-6">
+          {/* Header */}
+          <div className="flex flex-col items-center gap-2 select-none">
+            <Heart className="h-5 w-5 fill-rose-300 text-rose-400 animate-pulse" />
+            <span
+              className="text-[10px] tracking-[0.22em] uppercase text-rose-400 font-mono"
+            >
+              My Secret Thought
+            </span>
+            <div className="h-px w-20 bg-gradient-to-r from-transparent via-rose-200 to-transparent" />
+            <p
+              style={{
+                fontFamily: "'Georgia', 'Times New Roman', serif",
+                fontSize: '11px',
+                color: '#c97a8a',
+                letterSpacing: '0.05em',
+              }}
+            >
+              {memory.displayDate} &mdash; {memory.title}
+            </p>
           </div>
 
-          {/* the note text */}
-          <p className="text-base font-serif italic text-rose-900 leading-loose relative z-10">
+          {/* Letter body */}
+          <p
+            style={{
+              fontFamily: "'Georgia', 'Times New Roman', serif",
+              fontSize: '17px',
+              lineHeight: '1.85',
+              color: '#4a1525',
+              fontStyle: 'italic',
+              letterSpacing: '0.01em',
+              textAlign: 'center',
+            }}
+          >
             &ldquo;{memory.secretNote}&rdquo;
           </p>
 
-          {/* close hint */}
-          <button
-            onClick={onClose}
-            className="mt-8 flex items-center gap-1.5 text-[10px] text-rose-400 hover:text-rose-600 transition-colors cursor-pointer font-mono uppercase tracking-widest"
-          >
-            <EyeOff className="h-3 w-3" /> close
-          </button>
+          {/* Signature line */}
+          <div className="flex flex-col items-center gap-1 select-none">
+            <div className="h-px w-16 bg-gradient-to-r from-transparent via-rose-200 to-transparent" />
+            <span
+              style={{
+                fontFamily: "'Georgia', 'Times New Roman', serif",
+                fontSize: '13px',
+                color: '#c97a8a',
+                fontStyle: 'italic',
+              }}
+            >
+              — Kamlesh
+            </span>
+          </div>
         </div>
+
+        {/* Close button */}
+        <button
+          onClick={onClose}
+          className="absolute top-3 right-3 p-1.5 rounded-full text-rose-300 hover:text-rose-600 hover:bg-rose-50 transition-colors"
+          aria-label="Close"
+        >
+          <X className="h-4 w-4" />
+        </button>
       </div>
     </div>
   );
@@ -321,7 +358,7 @@ function TextPanel({ memory, align }: { memory: Memory; align: 'left' | 'right' 
       {/* Description */}
       <p className="text-sm text-gray-600 leading-relaxed font-sans">{memory.description}</p>
 
-      {/* Secret note trigger */}
+      {/* Secret note button */}
       <button
         onClick={() => setOpen(true)}
         className={`flex items-center gap-1.5 text-[11px] font-bold text-pink-500 hover:text-rose-600 bg-rose-50 hover:bg-rose-100 px-3 py-2 rounded-xl border border-pink-100 transition-colors cursor-pointer ${isRight ? 'self-end' : 'self-start'}`}
@@ -331,7 +368,7 @@ function TextPanel({ memory, align }: { memory: Memory; align: 'left' | 'right' 
         <Eye className="h-3.5 w-3.5 animate-pulse" />
       </button>
 
-      {open && <SecretNoteModal memory={memory} onClose={() => setOpen(false)} />}
+      {open && <SecretLetterModal memory={memory} onClose={() => setOpen(false)} />}
     </div>
   );
 }
