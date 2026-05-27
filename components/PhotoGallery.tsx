@@ -38,7 +38,7 @@ const GALLERY: MediaItem[] = [
     id: 'ik1',
     src: '/assets/images/initial kises/document_6104686542519803672.mp4',
     type: 'video',
-    caption: 'Our very first kiss 💋',
+    caption: 'Your very first kisses 💋',
     album: 'Initial Kisses',
     albumEmoji: '💋',
   },
