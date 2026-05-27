@@ -60,7 +60,7 @@ export default function Home() {
   const [activePaletteIndex, setActivePaletteIndex] = React.useState(0);
   const [activeTab, setActiveTab] = React.useState<'timeline' | 'gallery' | 'notes' | 'music'>('timeline');
 
-  const CORRECT_DATE = '2024-11-08';
+  const CORRECT_DATE = '2024-12-25';
 
   // Live timer States
   const [daysOfLove, setDaysOfLove] = React.useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
@@ -116,7 +116,7 @@ export default function Home() {
 
   const handleUnlockAndSave = () => {
     if (anniversary !== CORRECT_DATE) {
-      setDateError('Hmm, that date doesn\'t feel right. Remember the day we realised our love? 💕');
+      setDateError('Hmm, that date doesn\'t feel right. Remember the first time we made love? 💕');
       return;
     }
     setDateError('');
@@ -249,7 +249,7 @@ export default function Home() {
             {/* Input config ledger */}
             <div className="space-y-4 text-left mb-8">
               <div>
-                <label className="block text-[10px] font-bold text-rose-900 uppercase tracking-widest mb-1.5 font-sans">Date we realise our love</label>
+                <label className="block text-[10px] font-bold text-rose-900 uppercase tracking-widest mb-1.5 font-sans">The date we first made love</label>
                 <input
                   type="date"
                   value={anniversary}
