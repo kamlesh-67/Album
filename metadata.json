@@ -1,0 +1,6 @@
+{
+  "name": "Love Memory Album",
+  "description": "An intimate, sentimental memory album dedicated to love, featuring an interactive timeline, photo galleries, interactive music, and date-unlocked secret notes with floating sparkles, hearts, and whimsical animations.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

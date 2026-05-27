@@ -1,0 +1,120 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@theme {
+  --font-sans: var(--font-sans), sans-serif;
+  --font-serif: var(--font-serif), serif;
+  --font-cursive: var(--font-cursive), cursive;
+}
+
+/* Custom whimsical keyframe animations */
+@keyframes float-gentle {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-12px) rotate(3deg);
+  }
+}
+
+@keyframes float-random {
+  0% {
+    transform: translateY(110vh) translateX(0) scale(0.8) rotate(0deg);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.8;
+  }
+  90% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(-10vh) translateX(100px) scale(1.2) rotate(360deg);
+    opacity: 0;
+  }
+}
+
+@keyframes flutter {
+  0%, 100% {
+    transform: translateY(0px) translateX(0px) rotate(0deg) scaleX(1);
+  }
+  25% {
+    transform: translateY(-15px) translateX(10px) rotate(5deg) scaleX(0.7);
+  }
+  50% {
+    transform: translateY(-5px) translateX(25px) rotate(-5deg) scaleX(1);
+  }
+  75% {
+    transform: translateY(-20px) translateX(12px) rotate(3deg) scaleX(0.7);
+  }
+}
+
+@keyframes shimmer {
+  0%, 100% {
+    opacity: 0.2;
+    transform: scale(0.8);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+.animate-float-gentle {
+  animation: float-gentle 6s ease-in-out infinite;
+}
+
+.animate-float-gentle-delayed {
+  animation: float-gentle 6s ease-in-out infinite;
+  animation-delay: 3s;
+}
+
+.animate-float-random {
+  animation: float-random 16s linear infinite;
+}
+
+.animate-flutter {
+  animation: flutter 10s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  animation: shimmer 2.5s ease-in-out infinite;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #fff8f5;
+}
+::-webkit-scrollbar-thumb {
+  background: #ffd6db;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #ffb8c0;
+}
+
+/* Base custom classes */
+.font-cursive {
+  font-family: var(--font-cursive), cursive;
+}
+
+.font-serif {
+  font-family: var(--font-serif), serif;
+}
+
+.glass-morphism {
+  background: rgba(255, 255, 255, 0.65);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.glass-morphism-dark {
+  background: rgba(255, 240, 242, 0.85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 184, 192, 0.4);
+}
