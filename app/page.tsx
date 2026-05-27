@@ -2,13 +2,19 @@
 
 import * as React from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Heart, Stars, Sparkles, Calendar, BookOpen, Music, ShieldAlert, Settings, Camera, Flame } from 'lucide-react';
+import { Heart, Stars, Sparkles, Calendar, BookOpen, Music, ShieldAlert, Settings, Camera, Flame, X, Monitor } from 'lucide-react';
 import SparklesBackground from '@/components/Sparkles';
 import MusicPlayer from '@/components/MusicPlayer';
 import Timeline from '@/components/Timeline';
 import PhotoGallery from '@/components/PhotoGallery';
 import SecretNotes from '@/components/SecretNotes';
 import { ThemeContext, PALETTES } from '@/lib/ThemeContext';
+
+// ── Modal layer order ──────────────────────────────────────────────────────────
+// 1. Desktop-only gate (if mobile)
+// 2. "Do you love me?" gate (if not answered Yes)
+// 3. Guidelines modal (once per session)
+// 4. Main album content
 
 export default function Home() {
   const [unlocked, setUnlocked] = React.useState(false);
@@ -19,24 +25,78 @@ export default function Home() {
   const [activePaletteIndex, setActivePaletteIndex] = React.useState(0);
   const [activeTab, setActiveTab] = React.useState<'timeline' | 'gallery' | 'notes' | 'music'>('timeline');
 
+  // ── Gate states ───────────────────────────────────────────────────────────────
+  const [isMobile, setIsMobile] = React.useState(false);
+  // null = not answered yet, 'yes' = accepted, 'no' = rejected
+  const [loveAnswer, setLoveAnswer] = React.useState<'yes' | 'no' | null>(null);
+  const [showGuidelines, setShowGuidelines] = React.useState(false);
+  const [appReady, setAppReady] = React.useState(false);
+
   const CORRECT_DATE = '2024-11-08';
 
   // Live timer States
   const [daysOfLove, setDaysOfLove] = React.useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
-  // Load configuration from local storage
+  // ── Boot-time gate checks (runs once, client-only) ────────────────────────
   React.useEffect(() => {
+    // 1. Mobile detection — block screens under 1024px
+    const checkMobile = () => setIsMobile(window.innerWidth < 1024);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+
+    // 2. Love answer — persisted in localStorage forever
+    const storedLove = localStorage.getItem('love_gate_answer');
+    if (storedLove === 'yes') {
+      setLoveAnswer('yes');
+    } else if (storedLove === 'no') {
+      setLoveAnswer('no');
+    }
+
+    // 3. Guidelines — shown once per browser session (sessionStorage)
+    const seenGuidelines = sessionStorage.getItem('seen_guidelines');
+    if (!seenGuidelines && storedLove === 'yes') {
+      setShowGuidelines(true);
+    }
+
+    // 4. Album unlock state
     const savedAnniv = localStorage.getItem('love_anniversary');
     const savedPal = localStorage.getItem('love_theme_idx');
     const savedUnlock = localStorage.getItem('love_unlocked');
+    if (savedAnniv) setAnniversary(savedAnniv);
+    if (savedPal) setActivePaletteIndex(Number(savedPal));
+    if (savedUnlock === 'true') setUnlocked(true);
 
-    const timer = setTimeout(() => {
-      if (savedAnniv) setAnniversary(savedAnniv);
-      if (savedPal) setActivePaletteIndex(Number(savedPal));
-      if (savedUnlock === 'true') setUnlocked(true);
-    }, 0);
-    return () => clearTimeout(timer);
+    setAppReady(true);
+    return () => window.removeEventListener('resize', checkMobile);
   }, []);
+
+  const handleLoveYes = () => {
+    localStorage.setItem('love_gate_answer', 'yes');
+    setLoveAnswer('yes');
+    const seenGuidelines = sessionStorage.getItem('seen_guidelines');
+    if (!seenGuidelines) setShowGuidelines(true);
+  };
+
+  const handleLoveNo = () => {
+    localStorage.setItem('love_gate_answer', 'no');
+    setLoveAnswer('no');
+  };
+
+  const handleCloseGuidelines = () => {
+    sessionStorage.setItem('seen_guidelines', 'true');
+    setShowGuidelines(false);
+  };
+
+  // Load configuration from local storage (legacy effect kept for hot-reload safety)
+  React.useEffect(() => {
+    if (!appReady) return;
+    const savedAnniv = localStorage.getItem('love_anniversary');
+    const savedPal = localStorage.getItem('love_theme_idx');
+    const savedUnlock = localStorage.getItem('love_unlocked');
+    if (savedAnniv) setAnniversary(savedAnniv);
+    if (savedPal) setActivePaletteIndex(Number(savedPal));
+    if (savedUnlock === 'true') setUnlocked(true);
+  }, [appReady]);
 
   // Anniversary Live Ticker update
   React.useEffect(() => {
@@ -98,9 +158,202 @@ export default function Home() {
       className="min-h-screen relative flex flex-col items-center transition-colors duration-500 py-6 sm:py-12 px-4 select-none"
       style={{ background: p.bg }}
     >
-      
+
       {/* Absolute particle / spark background layout */}
       <SparklesBackground />
+
+      {/* ── GATE 1: Mobile / small-screen block ──────────────────────────── */}
+      <AnimatePresence>
+        {appReady && isMobile && (
+          <motion.div
+            key="mobile-gate"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-gradient-to-br from-rose-50 to-pink-100 px-8 text-center"
+          >
+            <div className="bg-white/90 rounded-3xl shadow-2xl p-10 max-w-sm border border-pink-200">
+              <div className="mx-auto mb-5 h-16 w-16 rounded-full bg-gradient-to-r from-pink-400 to-rose-400 flex items-center justify-center shadow-lg shadow-pink-200">
+                <Monitor className="h-8 w-8 text-white" />
+              </div>
+              <h2 className="font-serif text-2xl font-bold text-rose-900 mb-3">Open on a Laptop</h2>
+              <p className="text-sm text-rose-700/80 leading-relaxed mb-2">
+                This Memory Album is crafted for desktop browsers and requires a screen wider than 1024px.
+              </p>
+              <p className="text-xs text-gray-400 font-mono tracking-widest uppercase mt-4">
+                Please open on a laptop or desktop computer
+              </p>
+              <div className="mt-6 flex items-center justify-center gap-1 text-rose-400">
+                <Heart className="h-4 w-4 fill-rose-400 animate-pulse" />
+                <Heart className="h-3 w-3 fill-rose-300 animate-pulse" style={{ animationDelay: '0.3s' }} />
+                <Heart className="h-4 w-4 fill-rose-400 animate-pulse" style={{ animationDelay: '0.6s' }} />
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── GATE 2: "Do you love me?" modal ─────────────────────────────── */}
+      <AnimatePresence>
+        {appReady && !isMobile && loveAnswer === null && (
+          <motion.div
+            key="love-gate"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
+            transition={{ duration: 0.4 }}
+            className="fixed inset-0 z-[190] flex items-center justify-center bg-black/30 backdrop-blur-sm px-4"
+          >
+            <motion.div
+              initial={{ scale: 0.85, opacity: 0, y: 30 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ duration: 0.45, ease: 'easeOut' }}
+              className="bg-white/95 rounded-3xl shadow-2xl border border-pink-200 p-10 max-w-sm w-full text-center relative overflow-hidden"
+            >
+              {/* Soft blobs */}
+              <div className="absolute -top-12 -left-12 h-36 w-36 rounded-full bg-pink-100 opacity-40 pointer-events-none" />
+              <div className="absolute -bottom-12 -right-12 h-36 w-36 rounded-full bg-rose-100 opacity-40 pointer-events-none" />
+
+              <div className="relative z-10">
+                <div className="mx-auto mb-5 h-20 w-20 rounded-full bg-gradient-to-r from-pink-400 to-rose-500 flex items-center justify-center shadow-xl shadow-pink-300 animate-pulse-slow">
+                  <Heart className="h-10 w-10 text-white fill-white" />
+                </div>
+
+                <span className="text-[10px] uppercase font-bold tracking-widest text-rose-400 font-mono block mb-2">
+                  Before You Enter
+                </span>
+                <h2 className="font-serif text-3xl font-bold text-rose-950 mb-2 leading-tight">
+                  Do you love me?
+                </h2>
+                <p className="text-xs text-rose-600/70 mb-8 leading-relaxed">
+                  This album was made with all my heart. Answer truly — it opens only for love.
+                </p>
+
+                <div className="flex gap-4 justify-center">
+                  <button
+                    onClick={handleLoveYes}
+                    className="flex-1 py-4 rounded-2xl text-white font-serif font-bold text-base shadow-xl transition-all active:scale-95 hover:scale-105 duration-200 cursor-pointer"
+                    style={{ background: 'linear-gradient(to right, #f43f5e, #ec4899)' }}
+                  >
+                    <span className="flex items-center justify-center gap-2">
+                      <Heart className="h-5 w-5 fill-white animate-pulse" />
+                      Yes
+                    </span>
+                  </button>
+                  <button
+                    onClick={handleLoveNo}
+                    className="flex-1 py-4 rounded-2xl text-rose-400 font-serif font-bold text-base border-2 border-rose-200 bg-white hover:bg-rose-50 transition-all active:scale-95 duration-200 cursor-pointer"
+                  >
+                    No
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── GATE 2b: Rejected screen (No was chosen) ─────────────────────── */}
+      <AnimatePresence>
+        {appReady && !isMobile && loveAnswer === 'no' && (
+          <motion.div
+            key="rejected-gate"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="fixed inset-0 z-[190] flex items-center justify-center bg-gradient-to-br from-gray-50 to-rose-50 px-4"
+          >
+            <div className="bg-white/90 rounded-3xl shadow-xl border border-rose-100 p-12 max-w-sm w-full text-center">
+              <div className="mx-auto mb-5 h-16 w-16 rounded-full bg-gray-100 flex items-center justify-center">
+                <Heart className="h-8 w-8 text-gray-300" />
+              </div>
+              <h2 className="font-serif text-2xl font-bold text-gray-400 mb-3">This album is not for you.</h2>
+              <p className="text-xs text-gray-400 leading-relaxed">
+                This space holds memories that belong only to those who love truly. Come back when you do.
+              </p>
+              <p className="mt-6 text-[10px] text-gray-300 font-mono tracking-widest uppercase">
+                Access permanently closed in this browser
+              </p>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── GATE 3: Guidelines modal (once per session) ───────────────────── */}
+      <AnimatePresence>
+        {appReady && !isMobile && loveAnswer === 'yes' && showGuidelines && (
+          <motion.div
+            key="guidelines-modal"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 z-[180] flex items-center justify-center bg-black/25 backdrop-blur-sm px-4"
+          >
+            <motion.div
+              initial={{ scale: 0.88, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.93, opacity: 0 }}
+              transition={{ duration: 0.4, ease: 'easeOut' }}
+              className="bg-white/97 rounded-3xl shadow-2xl border border-pink-200 p-8 max-w-md w-full relative overflow-hidden"
+            >
+              <div className="absolute -top-10 -right-10 h-32 w-32 rounded-full bg-pink-50 opacity-50 pointer-events-none" />
+
+              <button
+                onClick={handleCloseGuidelines}
+                className="absolute top-4 right-4 h-8 w-8 rounded-full bg-rose-50 hover:bg-rose-100 flex items-center justify-center text-rose-400 transition-colors cursor-pointer"
+              >
+                <X className="h-4 w-4" />
+              </button>
+
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-5">
+                  <div className="h-10 w-10 rounded-full bg-gradient-to-r from-pink-400 to-rose-400 flex items-center justify-center shadow-md">
+                    <BookOpen className="h-5 w-5 text-white" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] uppercase font-bold tracking-widest text-rose-400 font-mono block">Welcome Back</span>
+                    <h3 className="font-serif text-xl font-bold text-rose-900 leading-tight">How to use this Album</h3>
+                  </div>
+                </div>
+
+                <ul className="space-y-3 mb-7 text-sm text-rose-800/80 leading-relaxed">
+                  <li className="flex gap-2.5 items-start">
+                    <span className="mt-0.5 text-rose-400">🔑</span>
+                    <span>Enter the date we realised our love to unlock the album. The date is our secret.</span>
+                  </li>
+                  <li className="flex gap-2.5 items-start">
+                    <span className="mt-0.5 text-rose-400">🎨</span>
+                    <span>Pick your favourite pastel shade — it colours the whole experience just for you.</span>
+                  </li>
+                  <li className="flex gap-2.5 items-start">
+                    <span className="mt-0.5 text-rose-400">📖</span>
+                    <span>Explore Timeline, Polaroid Gallery, Secret Chest, and Love Harmony tabs inside.</span>
+                  </li>
+                  <li className="flex gap-2.5 items-start">
+                    <span className="mt-0.5 text-rose-400">💾</span>
+                    <span>Your settings are saved automatically. Close & Lock Book resets to the cover.</span>
+                  </li>
+                  <li className="flex gap-2.5 items-start">
+                    <span className="mt-0.5 text-rose-400">🎵</span>
+                    <span>Music keeps playing even when you switch tabs — a floating player appears in the corner.</span>
+                  </li>
+                </ul>
+
+                <button
+                  onClick={handleCloseGuidelines}
+                  className="w-full py-3.5 rounded-2xl text-white font-serif font-bold text-sm shadow-lg transition-all active:scale-95 hover:opacity-90 duration-200 cursor-pointer"
+                  style={{ background: 'linear-gradient(to right, #f43f5e, #ec4899)' }}
+                >
+                  <span className="flex items-center justify-center gap-2">
+                    <Heart className="h-4 w-4 fill-white animate-pulse" />
+                    Enter the Album
+                  </span>
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Elegant whimsical butterflies floating on background boundaries (using standard CSS animations) */}
       <div className="absolute top-16 left-[5%] text-pink-400 pointer-events-none opacity-40 animate-flutter z-0">
