@@ -82,6 +82,9 @@ export default function Home() {
   const handleRelockAndClear = () => {
     if (confirm('Do you wish to lock this Memory Album binder again? This will close the album cover.')) {
       localStorage.removeItem('love_unlocked');
+      localStorage.removeItem('love_anniversary');
+      setAnniversary('');
+      setDateError('');
       setUnlocked(false);
     }
   };
