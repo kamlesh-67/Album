@@ -50,7 +50,60 @@ const PALETTES: Palette[] = [
   }
 ];
 
+function isMobileDevice(): boolean {
+  if (typeof window === 'undefined') return false;
+  const ua = navigator.userAgent;
+  // Touch-primary devices: phones and tablets
+  const mobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile|Tablet/i.test(ua);
+  // Also catch small screens (phones/tablets up to 1024px)
+  const smallScreen = window.innerWidth < 1024;
+  return mobileUA || smallScreen;
+}
+
+function MobileBlock() {
+  return (
+    <div className="min-h-screen bg-[#fffbfb] flex flex-col items-center justify-center px-8 text-center">
+      <div className="flex flex-col items-center gap-6 max-w-xs">
+        {/* icon */}
+        <div className="w-20 h-20 rounded-3xl bg-rose-50 border border-rose-100 flex items-center justify-center shadow-sm">
+          <span className="text-4xl">💻</span>
+        </div>
+
+        {/* heading */}
+        <div>
+          <h1 className="font-serif font-bold text-rose-900 text-2xl mb-2 leading-snug">
+            Open on a Laptop
+          </h1>
+          <p className="text-sm text-gray-500 leading-relaxed font-sans">
+            This memory album was crafted for a larger screen. Please open it on your laptop or desktop for the full experience.
+          </p>
+        </div>
+
+        {/* divider with heart */}
+        <div className="flex items-center gap-3 w-full">
+          <div className="h-px flex-1 bg-rose-100" />
+          <Heart className="h-4 w-4 text-rose-300 fill-rose-200 animate-pulse" />
+          <div className="h-px flex-1 bg-rose-100" />
+        </div>
+
+        {/* headphones hint */}
+        <div className="flex items-start gap-3 bg-purple-50 border border-purple-100 rounded-2xl px-4 py-3 text-left w-full">
+          <span className="text-lg shrink-0">🎧</span>
+          <p className="text-sm text-purple-800 leading-snug font-sans">
+            Wear headphones too — the music and videos are much more intimate that way.
+          </p>
+        </div>
+
+        <p className="text-[10px] font-mono text-rose-300 tracking-widest uppercase">
+          Made with love — Kamlesh &amp; Sunita
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export default function Home() {
+  const [isMobile, setIsMobile] = React.useState(false);
   const [unlocked, setUnlocked] = React.useState(false);
   const [showWelcomeDialog, setShowWelcomeDialog] = React.useState(false);
   const userName = 'Kamlesh';
@@ -64,6 +117,14 @@ export default function Home() {
 
   // Live timer States
   const [daysOfLove, setDaysOfLove] = React.useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
+
+  // Detect mobile / small screen — re-check on resize
+  React.useEffect(() => {
+    const check = () => setIsMobile(isMobileDevice());
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   // Show welcome dialog on very first visit
   React.useEffect(() => {
@@ -134,6 +195,8 @@ export default function Home() {
   };
 
   const currentPalette = PALETTES[activePaletteIndex];
+
+  if (isMobile) return <MobileBlock />;
 
   return (
     <main className={`min-h-screen relative flex flex-col items-center transition-colors duration-500 py-6 sm:py-12 px-4 select-none ${currentPalette.bgClass}`}>
